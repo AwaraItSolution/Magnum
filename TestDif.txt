@@ -1,0 +1,20 @@
+declare @table table(SaleDay datetime, item varchar(10), amount int)
+insert into @table values('2018-01-01','a',1)
+insert into @table values('2018-01-01','a',2)
+insert into @table values('2018-01-01','a',0)
+insert into @table values('2018-01-01','a',0)
+insert into @table values('2018-01-01','a',0)
+insert into @table values('2018-01-01','a',0)
+insert into @table values('2018-01-01','a',1)
+insert into @table values('2018-01-01','a',0)
+
+-- определение дней по товарам, которые окружены днями без продаж
+select t_now.*, t_yest.*, t_tom.*
+  from @table as t_now join @table as t_yest 
+		-- проверка того, что предыдущий день, как и текущий без продаж
+		on (t_now.item = t_yest.item) and (t_now.SaleDay = dateadd(day,-1,t_yest.SaleDay)) and 
+			((t_now.amount = t_yest.amount) and (t_now.amount = 0))
+		-- проверка того, что следующий день, как и текущий без продаж
+        join @table as t_tom
+		on (t_now.item = t_tom.item) and (t_now.SaleDay = dateadd(day,1,t_tom.SaleDay)) and 
+			((t_now.amount = t_tom.amount) and (t_now.amount = 0))
